@@ -1,5 +1,4 @@
 import json
-import asyncio
 import os
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
@@ -12,7 +11,6 @@ from app.models.task_log import TaskLog
 from app.models.artifact import Artifact
 from app.services.agent_engine import run_agent
 from app.services.sse_manager import sse_manager
-
 
 router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 
@@ -52,7 +50,7 @@ async def create_task(data: TaskCreate, background_tasks: BackgroundTasks, db: A
     await db.commit()
     await db.refresh(task)
 
-    background_tasks.add_task(_execute_task_bg, task.id, data.instruction)
+    background_tasks.add_task(_execute_task_bg, task.id)
 
     return TaskOut(
         id=task.id,
@@ -137,24 +135,20 @@ async def list_artifacts(task_id: str, db: AsyncSession = Depends(get_session)):
     return [{"id": a.id, "file_name": a.file_name, "file_path": a.file_path, "file_size": a.file_size} for a in artifacts]
 
 
-async def _execute_task_bg(task_id: str, instruction: str):
-    from app.config import async_session, engine
-    from sqlalchemy.ext.asyncio import AsyncSession
+async def _execute_task_bg(task_id: str):
+    from app.config import async_session
+    from sqlalchemy import select
 
     async with async_session() as db:
-        from sqlalchemy import select
         result = await db.execute(select(Task).where(Task.id == task_id))
         task = result.scalar_one_or_none()
         if not task:
             return
 
-        event_queue = sse_manager.subscribe(task_id)
-
         try:
-            await run_agent(task, event_queue, async_session)
+            await run_agent(task, async_session)
         except Exception as e:
             task.status = "failed"
             task.error_message = str(e)[:500]
 
         await db.commit()
-        sse_manager.unsubscribe(task_id, event_queue)
