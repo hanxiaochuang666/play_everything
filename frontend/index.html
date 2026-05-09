@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI虚拟开发助理</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>🤖 任务列表</h2>
+        <button class="btn-new" id="btn-new-task">+ 新建</button>
+      </div>
+      <div class="task-list" id="task-list"></div>
+    </aside>
+
+    <main class="main-panel">
+      <header class="main-header">
+        <span>💻 AI虚拟开发助理</span>
+        <span class="task-status-badge" id="task-badge"></span>
+      </header>
+
+      <div class="chat-area" id="chat-messages"></div>
+
+      <div class="file-panel" id="file-panel">
+        <h3>📦 产出文件</h3>
+        <div id="file-list"></div>
+      </div>
+
+      <div class="input-area">
+        <form id="chat-form">
+          <textarea id="chat-input" placeholder="输入你的开发需求，例如：帮我写一个Python脚本下载今日天气保存为CSV..." rows="1"></textarea>
+          <button type="submit" class="btn-send">发送</button>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/state.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/sse.js"></script>
+  <script src="/js/chat.js"></script>
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
