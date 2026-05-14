@@ -4,8 +4,8 @@ const State = {
 
     setCurrentTask(id) {
         this.currentTaskId = id;
-        document.querySelectorAll('.task-item').forEach(el => {
-            el.classList.toggle('active', el.dataset.taskId === id);
+        document.querySelectorAll('.task-strip-item').forEach(el => {
+            el.classList.toggle('active', el.getAttribute('data-id') === id);
         });
     },
 

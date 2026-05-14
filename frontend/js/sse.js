@@ -1,39 +1,47 @@
 function connectSSE(taskId, handlers) {
-    const url = `/api/tasks/${taskId}/stream`;
-    console.log('[SSE] 连接中:', url);
-    const es = new EventSource(url);
+  var es = new EventSource('/api/tasks/' + taskId + '/stream');
+  console.log('[DEBUG] SSE connected for task:', taskId);
 
-    es.addEventListener('open', () => {
-        console.log('[SSE] 已连接:', taskId.slice(0, 8));
-    });
+  es.addEventListener('status', function(e) {
+    var data = JSON.parse(e.data);
+    console.log('[SSE] status:', data);
+    if (handlers.onStatus) handlers.onStatus(data);
+  });
 
-    es.addEventListener('status', e => {
-        console.log('[SSE] status:', e.data.slice(0, 80));
-        handlers.onStatus(JSON.parse(e.data));
-    });
+  es.addEventListener('log', function(e) {
+    var data = JSON.parse(e.data);
+    console.log('[SSE] log:', data.type, data.content && data.content.tool);
+    if (handlers.onLog) handlers.onLog(data);
+  });
 
-    es.addEventListener('log', e => {
-        console.log('[SSE] log:', e.data.slice(0, 80));
-        handlers.onLog(JSON.parse(e.data));
-    });
+  es.addEventListener('complete', function(e) {
+    var data = JSON.parse(e.data);
+    console.log('[SSE] complete:', data);
+    es.close();
+    if (handlers.onComplete) handlers.onComplete(data);
+  });
 
-    es.addEventListener('complete', e => {
-        console.log('[SSE] complete:', e.data.slice(0, 80));
-        handlers.onComplete(JSON.parse(e.data));
-        es.close();
-    });
+  es.addEventListener('error_event', function(e) {
+    var data = JSON.parse(e.data);
+    console.log('[SSE] error:', data);
+    es.close();
+    if (handlers.onError) handlers.onError(data);
+  });
 
-    es.addEventListener('error', e => {
-        if (e.data) {
-            try {
-                handlers.onError(JSON.parse(e.data));
-            } catch (_) {
-                handlers.onError({ error: 'SSE 解析失败' });
-            }
-        }
-        console.log('[SSE] 连接关闭:', taskId.slice(0, 8));
-        es.close();
-    });
+  es.onerror = function(e) {
+    console.error('[SSE] connection error:', e);
+    if (handlers.onError) handlers.onError({ error: 'SSE连接断开' });
+  };
 
-    return es;
+  return es;
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }

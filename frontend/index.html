@@ -3,44 +3,66 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI虚拟开发助理</title>
+  <title>AI 虚拟工作室</title>
   <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
 </head>
 <body>
   <div class="app-layout">
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <h2>🤖 任务列表</h2>
-        <button class="btn-new" id="btn-new-task">+ 新建</button>
+    <!-- 左侧：2D 办公场景 -->
+    <div class="scene-panel" id="scene-panel">
+      <div class="scene-header">
+        <span class="scene-title-icon">🏢</span>
+        <span>AI 虚拟工作室</span>
+        <span class="scene-hint">滚轮缩放 · 拖拽移动</span>
       </div>
-      <div class="task-list" id="task-list"></div>
-    </aside>
+      <div class="scene-selected-char" id="selected-char-info">
+        <span id="char-name">Boss</span>
+        <span class="char-role-badge" id="char-role">总负责人</span>
+      </div>
+      <div id="game-container"></div>
+    </div>
 
-    <main class="main-panel">
-      <header class="main-header">
-        <span>💻 AI虚拟开发助理</span>
-        <span class="task-status-badge" id="task-badge"></span>
-      </header>
-
-      <div class="chat-area" id="chat-messages"></div>
-
-      <div class="file-panel" id="file-panel">
-        <h3>📦 产出文件</h3>
-        <div id="file-list"></div>
+    <!-- 右侧：任务 & 对话面板 -->
+    <div class="right-panel">
+      <!-- 紧凑任务列表 -->
+      <div class="task-strip" id="task-strip">
+        <div class="task-strip-header">
+          <span>📋 任务</span>
+          <button class="btn-new" id="btn-new-task">+ 新建</button>
+        </div>
+        <div class="task-strip-list" id="task-list"></div>
       </div>
 
-      <div class="input-area">
-        <form id="chat-form">
-          <textarea id="chat-input" placeholder="输入你的开发需求，例如：帮我写一个Python脚本下载今日天气保存为CSV..." rows="1"></textarea>
-          <button type="submit" class="btn-send">发送</button>
-        </form>
+      <!-- 对话区 -->
+      <div class="main-panel">
+        <div class="chat-area" id="chat-messages">
+          <div class="chat-welcome">
+            <p>👋 点击场景中的角色，或直接在下方输入指令</p>
+            <p>支持 @角色名 来指定任务执行者</p>
+          </div>
+        </div>
+
+        <div class="file-panel" id="file-panel">
+          <h4>📦 产出文件</h4>
+          <div id="file-list"></div>
+        </div>
+
+        <div class="input-area">
+          <span class="input-target" id="input-target">发给: 所有人</span>
+          <form id="chat-form">
+            <textarea id="chat-input" placeholder="输入你的需求..." rows="1"></textarea>
+            <button type="submit" class="btn-send">发送</button>
+          </form>
+        </div>
       </div>
-    </main>
+    </div>
   </div>
 
   <script src="/js/state.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/sse.js"></script>
+  <script src="/js/scene.js"></script>
   <script src="/js/chat.js"></script>
   <script src="/js/sidebar.js"></script>
   <script src="/js/app.js"></script>
